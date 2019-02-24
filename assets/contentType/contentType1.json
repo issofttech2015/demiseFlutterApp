@@ -1,0 +1,266 @@
+[
+    {
+        "extension": ".3gp",
+        "value": "video/3gpp"
+    },
+    {
+        "extension": ".apk",
+        "value": "application/vnd.android.package-archive"
+    },
+    {
+        "extension": ".asf",
+        "value": "video/x-ms-asf"
+    },
+    {
+        "extension": ".avi",
+        "value": "video/x-msvideo"
+    },
+    {
+        "extension": ".bin",
+        "value": "application/octet-stream"
+    },
+    {
+        "extension": ".bmp",
+        "value": "image/bmp"
+    },
+    {
+        "extension": ".c",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".class",
+        "value": "application/octet-stream"
+    },
+    {
+        "extension": ".conf",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".cpp",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".doc",
+        "value": "application/msword"
+    },
+    {
+        "extension": ".docx",
+        "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+        "extension": ".xls",
+        "value": "application/vnd.ms-excel"
+    },
+    {
+        "extension": ".xlsx",
+        "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+        "extension": ".exe",
+        "value": "application/octet-stream"
+    },
+    {
+        "extension": ".gif",
+        "value": "image/gif"
+    },
+    {
+        "extension": ".gtar",
+        "value": "application/x-gtar"
+    },
+    {
+        "extension": ".gz",
+        "value": "application/x-gzip"
+    },
+    {
+        "extension": ".h",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".htm",
+        "value": "text/html"
+    },
+    {
+        "extension": ".html",
+        "value": "text/html"
+    },
+    {
+        "extension": ".jar",
+        "value": "application/java-archive"
+    },
+    {
+        "extension": ".java",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".jpeg",
+        "value": "image/jpeg"
+    },
+    {
+        "extension": ".jpg",
+        "value": "image/jpeg"
+    },
+    {
+        "extension": ".js",
+        "value": "application/x-javascript"
+    },
+    {
+        "extension": ".log",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".m3u",
+        "value": "audio/x-mpegurl"
+    },
+    {
+        "extension": ".m4a",
+        "value": "audio/mp4a-latm"
+    },
+    {
+        "extension": ".m4b",
+        "value": "audio/mp4a-latm"
+    },
+    {
+        "extension": ".m4p",
+        "value": "audio/mp4a-latm"
+    },
+    {
+        "extension": ".m4u",
+        "value": "video/vnd.mpegurl"
+    },
+    {
+        "extension": ".m4v",
+        "value": "video/x-m4v"
+    },
+    {
+        "extension": ".mov",
+        "value": "video/quicktime"
+    },
+    {
+        "extension": ".mp2",
+        "value": "audio/x-mpeg"
+    },
+    {
+        "extension": ".mp3",
+        "value": "audio/x-mpeg"
+    },
+    {
+        "extension": ".mp4",
+        "value": "video/mp4"
+    },
+    {
+        "extension": ".mpc",
+        "value": "application/vnd.mpohun.certificate"
+    },
+    {
+        "extension": ".mpe",
+        "value": "video/mpeg"
+    },
+    {
+        "extension": ".mpeg",
+        "value": "video/mpeg"
+    },
+    {
+        "extension": ".mpg",
+        "value": "video/mpeg"
+    },
+    {
+        "extension": ".mpg4",
+        "value": "video/mp4"
+    },
+    {
+        "extension": ".mpga",
+        "value": "audio/mpeg"
+    },
+    {
+        "extension": ".msg",
+        "value": "application/vnd.ms-outlook"
+    },
+    {
+        "extension": ".ogg",
+        "value": "audio/ogg"
+    },
+    {
+        "extension": ".pdf",
+        "value": "application/pdf"
+    },
+    {
+        "extension": ".png",
+        "value": "image/png"
+    },
+    {
+        "extension": ".pps",
+        "value": "application/vnd.ms-powerpoint"
+    },
+    {
+        "extension": ".ppt",
+        "value": "application/vnd.ms-powerpoint"
+    },
+    {
+        "extension": ".pptx",
+        "value": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    },
+    {
+        "extension": ".prop",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".rc",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".rmvb",
+        "value": "audio/x-pn-realaudio"
+    },
+    {
+        "extension": ".rtf",
+        "value": "application/rtf"
+    },
+    {
+        "extension": ".sh",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".tar",
+        "value": "application/x-tar"
+    },
+    {
+        "extension": ".tgz",
+        "value": "application/x-compressed"
+    },
+    {
+        "extension": ".txt",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".wav",
+        "value": "audio/x-wav"
+    },
+    {
+        "extension": ".wma",
+        "value": "audio/x-ms-wma"
+    },
+    {
+        "extension": ".wmv",
+        "value": "audio/x-ms-wmv"
+    },
+    {
+        "extension": ".wps",
+        "value": "application/vnd.ms-works"
+    },
+    {
+        "extension": ".xml",
+        "value": "text/plain"
+    },
+    {
+        "extension": ".z",
+        "value": "application/x-compress"
+    },
+    {
+        "extension": ".zip",
+        "value": "application/x-zip-compressed"
+    },
+    {
+        "extension": "",
+        "value": "*/*"
+    }
+]
