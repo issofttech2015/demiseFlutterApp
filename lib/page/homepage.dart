@@ -210,6 +210,7 @@ class _HomePageState extends State<HomePage> {
     }).catchError((ex) {
       setState(() {});
       print('Invalid Server. Please verify the address..');
+      print('Invalid Server. Please verify the address..');
     });
   }
 
