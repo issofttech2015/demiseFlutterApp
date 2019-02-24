@@ -316,7 +316,7 @@ class _DetailPageState extends State<DetailPage> {
       var ex1 = await SimplePermissions.requestPermission(
           Permission.ReadExternalStorage);
     } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      platformVersion = 'Failed to get platform version..';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
