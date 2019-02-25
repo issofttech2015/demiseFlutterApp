@@ -181,14 +181,14 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Color.fromRGBO(
           158, 166, 186, 0.4), // Color.fromRGBO(58, 66, 86, 1.0),
       title: Text('Demise'),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.power_settings_new),
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/logout');
-          },
-        )
-      ],
+      // actions: <Widget>[
+      //   IconButton(
+      //     icon: Icon(Icons.power_settings_new),
+      //     onPressed: () {
+      //       Navigator.pushReplacementNamed(context, '/logout');
+      //     },
+      //   )
+      // ],
     );
 
     return Scaffold(
