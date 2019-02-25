@@ -8,10 +8,9 @@ import 'package:connectivity/connectivity.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:demise/utilityhelper/globalutility.dart' as globals;
-import 'package:device_info/device_info.dart';
+// import 'package:device_info/device_info.dart';
 
 // import 'package:http/http.dart' as http;
-bool isAdmin = false;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -24,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   Connectivity connectivity;
   bool _connectionStatus = false;
   bool _loadingInProgress = false;
+// bool isAdmin = false;
 
   // List<int> arr = [];
 
@@ -38,13 +38,14 @@ class _LoginPageState extends State<LoginPage> {
               result == ConnectivityResult.mobile) &&
           !_connectionStatus) {
         _connectionStatus = true;
-        deviceInfo();
+        // deviceInfo();
         // showToast(result.toString());
       } else {
         print(result);
         _connectionStatus = false;
         showToast(result.toString());
       }
+      setState(() {});
     });
     super.initState();
   }
@@ -144,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                 //   ),
                 // ),
                 SizedBox(height: 20.0),
-                (_connectionStatus && isAdmin)
+                _connectionStatus
                     ? RaisedButton(
                         child: Text('Set API Config'),
                         color: Color.fromRGBO(158, 166, 186, 0.4),
@@ -289,19 +290,19 @@ class _LoginPageState extends State<LoginPage> {
         });
   }
 
-  void deviceInfo() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    print('Running on ${androidInfo.model}');
-    print('Running on ${androidInfo.androidId}');
-    print('Running on ${androidInfo.product}');
-    if (androidInfo.model == 'SM-G615F' &&
-        androidInfo.product == 'j7maxlteins') {
-      isAdmin = true;
-      setState(() {});
-    }
-    // isAdmin = true;
-  }
+  // void deviceInfo() async {
+  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //   print('Running on ${androidInfo.model}');
+  //   print('Running on ${androidInfo.androidId}');
+  //   print('Running on ${androidInfo.product}');
+  //   if (androidInfo.model == 'SM-G615F' &&
+  //       androidInfo.product == 'j7maxlteins') {
+  //     isAdmin = true;
+  //     setState(() {});
+  //   }
+  //   // isAdmin = true;
+  // }
 
   void checkServer() async {
     var serviceUrl = await globals.Util.getShared('service-url');
@@ -467,9 +468,13 @@ class _ApiConfingState extends State<ApiConfing> {
                 textColor: Colors.white,
                 child: new Text("Submit"),
                 onPressed: () {
-                  _loadingInProgress = true;
-                  setState(() {});
-                  checkServiceConnection(true);
+                  if (_password.text == 'Neel10') {
+                    _loadingInProgress = true;
+                    setState(() {});
+                    checkServiceConnection(true);
+                  } else {
+                    updateServiceUrl('You are not Admin');
+                  }
                 }),
           )
         ],
@@ -493,7 +498,7 @@ class _ApiConfingState extends State<ApiConfing> {
         // stationList(1);
         // getStation(1);
         if (isNotCheckServer) {
-          updateServiceUrl();
+          updateServiceUrl('Update API Config...');
         } else {
           _loadingInProgress = false;
           setState(() {});
@@ -506,22 +511,19 @@ class _ApiConfingState extends State<ApiConfing> {
       }
     }, onError: (ex) {
       _loadingInProgress = false;
-      isAdmin = true;
       setState(() {});
       showToast('Invalid Server. Please verify the address.');
     }).catchError((ex) {
       _loadingInProgress = false;
       setState(() {});
-      isAdmin = true;
       showToast('Invalid Server. Please verify the address.');
     });
   }
 
-  void updateServiceUrl() {
+  void updateServiceUrl(msg) {
     if (Navigator.canPop(context)) {
-      isAdmin = true;
       Navigator.pop(context);
-      showToast('Update API Config...');
+      showToast(msg);
     }
   }
 }
