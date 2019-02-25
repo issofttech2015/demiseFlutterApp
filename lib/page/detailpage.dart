@@ -24,6 +24,8 @@ class _DetailPageState extends State<DetailPage> {
   Permission permission;
   String serviceUrl = '';
   bool _loadingInProgress = true;
+  bool downloading = false;
+  var progressString = "";
 
   @override
   void initState() {
@@ -101,7 +103,7 @@ class _DetailPageState extends State<DetailPage> {
         children: <Widget>[
           Expanded(
             child: topContent(),
-          )
+          ),
         ],
       );
     }
@@ -144,7 +146,33 @@ class _DetailPageState extends State<DetailPage> {
               size: 25.0,
             ),
           ),
-        )
+        ),
+        downloading
+            ? Center(
+                child: Container(
+                  height: 120.0,
+                  width: 200.0,
+                  child: Card(
+                    color: Color.fromRGBO(58, 66, 86, .9),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          "Downloading File: $progressString",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            : Text(''),
       ],
     );
   }
@@ -268,19 +296,19 @@ class _DetailPageState extends State<DetailPage> {
           "$dirPath/" + widget.lesson.title, onReceiveProgress: (rec, total) {
         print("Rec: $rec , Total: $total");
 
-        // setState(() {
-        //   downloading = true;
-        //   progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
-        // });
+        setState(() {
+          downloading = true;
+          progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+        });
       });
     } catch (e) {
       print(e);
     }
 
-    // setState(() {
-    //   downloading = false;
-    //   progressString = "Completed";
-    // });
+    setState(() {
+      downloading = false;
+      progressString = "Completed";
+    });
     print("Download completed");
   }
 
