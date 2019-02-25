@@ -38,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
               result == ConnectivityResult.mobile) &&
           !_connectionStatus) {
         _connectionStatus = true;
+        pingGoogle();
         // deviceInfo();
         // showToast(result.toString());
       } else {
@@ -203,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: Color(0xFF3B5998),
                   ),
                   onPressed: () {
-                    showToast('Not Implemented');
+                    // showToast('Not Implemented');
                     Navigator.pushReplacementNamed(context, '/homepage');
                   },
                   color: Color.fromRGBO(158, 166, 186, 0.4),
@@ -236,29 +237,18 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void makeRequest() async {
-    setState(() {
-      _loadingInProgress = true;
-    });
-    await pingGoogle();
-    if (_connectionStatus) {
-      _loadingInProgress = false;
-      setState(() {});
-    }
-  }
-
   Future pingGoogle() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         print('Internet Connected');
         _connectionStatus = true;
-        return 1;
+        checkServiceConnectionAndLogin();
       }
     } on SocketException catch (_) {
       _connectionStatus = false;
       showToast('Internet Not Available');
-      return 0;
+      setState(() {});
     }
   }
 
@@ -310,6 +300,33 @@ class _LoginPageState extends State<LoginPage> {
     serviceUrl ?? globals.Util.setShared('service-url', '192.168.0.69'); // per
     // serviceUrl ??
     //     globals.Util.setShared('service-url', '192.168.137.101:6161'); // temp
+  }
+
+  void checkServiceConnectionAndLogin() async {
+    var serviceUrl = await globals.Util.getShared('service-url');
+    dynamic data;
+    var args = {
+      "ip": serviceUrl,
+    };
+    globals.getdata(args, 'FTPAPI/API/CheckServer', serviceUrl).then(
+        (response) {
+      data = json.decode(response.body)["data"];
+      if (data.length > 0) {
+        Navigator.pushReplacementNamed(context, '/homepage');
+      } else {
+        _loadingInProgress = false;
+        setState(() {});
+        showToast('Login Failed.Invalid Server. Please verify the address.');
+      }
+    }, onError: (ex) {
+      _loadingInProgress = false;
+      setState(() {});
+      showToast('Login Failed.Invalid Server. Please verify the address.');
+    }).catchError((ex) {
+      _loadingInProgress = false;
+      setState(() {});
+      showToast('Login Failed.Invalid Server. Please verify the address.');
+    });
   }
 
   // void chckDwn() {
@@ -392,7 +409,7 @@ class _ApiConfingState extends State<ApiConfing> {
                     onEditingComplete: () {
                       _loadingInProgress = true;
                       setState(() {});
-                      checkServiceConnection(true);
+                      checkServiceConnection();
                     },
                     controller: _serviceName,
                     style: TextStyle(
@@ -406,21 +423,21 @@ class _ApiConfingState extends State<ApiConfing> {
                         hintText: 'Service Address'),
                   ),
                 ),
-                new Container(
-                  margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                  child: new IconButton(
-                      color: Colors.blueAccent,
-                      icon: Icon(
-                        Icons.network_check,
-                        color: Colors.white,
-                      ),
-                      tooltip: 'Check Service Connection',
-                      onPressed: () {
-                        _loadingInProgress = true;
-                        setState(() {});
-                        checkServiceConnection();
-                      }),
-                ),
+                // new Container(
+                //   margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                //   child: new IconButton(
+                //       color: Colors.blueAccent,
+                //       icon: Icon(
+                //         Icons.network_check,
+                //         color: Colors.white,
+                //       ),
+                //       tooltip: 'Check Service Connection',
+                //       onPressed: () {
+                //         _loadingInProgress = true;
+                //         setState(() {});
+                //         checkServiceConnection();
+                //       }),
+                // ),
               ],
             ),
           ),
@@ -471,7 +488,7 @@ class _ApiConfingState extends State<ApiConfing> {
                   if (_password.text == 'Neel10') {
                     _loadingInProgress = true;
                     setState(() {});
-                    checkServiceConnection(true);
+                    checkServiceConnection();
                   } else {
                     updateServiceUrl('You are not Admin');
                   }
@@ -482,7 +499,7 @@ class _ApiConfingState extends State<ApiConfing> {
     }
   }
 
-  void checkServiceConnection([bool isNotCheckServer = false]) async {
+  void checkServiceConnection() async {
     dynamic data;
     var args = {
       "ip": _serviceName.text,
@@ -495,14 +512,7 @@ class _ApiConfingState extends State<ApiConfing> {
       data = extractdata;
       if (data.length > 0) {
         globals.Util.setShared('service-url', _serviceName.text, false);
-        // stationList(1);
-        // getStation(1);
-        if (isNotCheckServer) {
-          updateServiceUrl('Update API Config...');
-        } else {
-          _loadingInProgress = false;
-          setState(() {});
-        }
+        updateServiceUrl('Update API Config...');
       } else {
         _loadingInProgress = false;
         setState(() {});
