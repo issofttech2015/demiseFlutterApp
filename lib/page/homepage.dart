@@ -210,7 +210,6 @@ class _HomePageState extends State<HomePage> {
     }).catchError((ex) {
       setState(() {});
       print('Invalid Server. Please verify the address..');
-      print('Invalid Server. Please verify the address..');
     });
   }
 
@@ -237,7 +236,8 @@ class _HomePageState extends State<HomePage> {
       _file = new File(_path);
       List<int> contents = await _file.readAsBytes();
 
-      data = Uri.encodeComponent(base64Encode(contents));
+      // data = Uri.encodeComponent(base64Encode(contents));
+      data = contents;
     } on PlatformException catch (e) {
       print(e.toString());
     }

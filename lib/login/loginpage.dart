@@ -11,6 +11,7 @@ import 'package:demise/utilityhelper/globalutility.dart' as globals;
 import 'package:device_info/device_info.dart';
 
 // import 'package:http/http.dart' as http;
+bool isAdmin = false;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -24,14 +25,12 @@ class _LoginPageState extends State<LoginPage> {
   bool _connectionStatus = false;
   bool _loadingInProgress = false;
 
-  bool isAdmin = false;
-
   // List<int> arr = [];
 
   @override
   void initState() {
     // TODO: implement initState
-    deviceInfo();
+    checkServer();
     connectivity = new Connectivity();
     subscription =
         connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
@@ -39,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
               result == ConnectivityResult.mobile) &&
           !_connectionStatus) {
         _connectionStatus = true;
+        deviceInfo();
         // showToast(result.toString());
       } else {
         print(result);
@@ -144,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                 //   ),
                 // ),
                 SizedBox(height: 20.0),
-                _connectionStatus && isAdmin
+                (_connectionStatus && isAdmin)
                     ? RaisedButton(
                         child: Text('Set API Config'),
                         color: Color.fromRGBO(158, 166, 186, 0.4),
@@ -235,8 +235,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  
-
   void makeRequest() async {
     setState(() {
       _loadingInProgress = true;
@@ -297,11 +295,20 @@ class _LoginPageState extends State<LoginPage> {
     print('Running on ${androidInfo.model}');
     print('Running on ${androidInfo.androidId}');
     print('Running on ${androidInfo.product}');
-    // isAdmin = (androidInfo.model == 'SM-G615F' &&
-    //     androidInfo.androidId == '8413c299f42351fc' &&
-    //     androidInfo.product == 'j7maxlteins');
-    isAdmin = true;
-    setState(() {});
+    if (androidInfo.model == 'SM-G615F' &&
+        androidInfo.product == 'j7maxlteins') {
+      isAdmin = true;
+      setState(() {});
+    }
+    // isAdmin = true;
+  }
+
+  void checkServer() async {
+    var serviceUrl = await globals.Util.getShared('service-url');
+
+    serviceUrl ?? globals.Util.setShared('service-url', '192.168.0.69'); // per
+    // serviceUrl ??
+    //     globals.Util.setShared('service-url', '192.168.137.101:6161'); // temp
   }
 
   // void chckDwn() {
@@ -499,17 +506,20 @@ class _ApiConfingState extends State<ApiConfing> {
       }
     }, onError: (ex) {
       _loadingInProgress = false;
+      isAdmin = true;
       setState(() {});
       showToast('Invalid Server. Please verify the address.');
     }).catchError((ex) {
       _loadingInProgress = false;
       setState(() {});
+      isAdmin = true;
       showToast('Invalid Server. Please verify the address.');
     });
   }
 
   void updateServiceUrl() {
     if (Navigator.canPop(context)) {
+      isAdmin = true;
       Navigator.pop(context);
       showToast('Update API Config...');
     }
