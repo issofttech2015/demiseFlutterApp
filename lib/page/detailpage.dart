@@ -143,7 +143,7 @@ class _DetailPageState extends State<DetailPage> {
             icon: Icon(
               Icons.arrow_back,
               color: Colors.white,
-              size: 25.0,
+              size: 30.0,
             ),
           ),
         ),
@@ -182,16 +182,16 @@ class _DetailPageState extends State<DetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         // SizedBox(height: 15.0),
-        Icon(
-          Icons.image,
-          color: Colors.white,
-          size: 25.0,
-        ),
-        Container(
-          width: 90.0,
-          child: new Divider(color: Colors.green),
-        ),
-        SizedBox(height: 10.0),
+        // Icon(
+        //   Icons.image,
+        //   color: Colors.white,
+        //   size: 25.0,
+        // ),
+        // Container(
+        //   width: 90.0,
+        //   child: new Divider(color: Colors.green),
+        // ),
+        // SizedBox(height: 10.0),
         Text(
           widget.lesson.title,
           style: TextStyle(color: Colors.white, fontSize: 16.0),
