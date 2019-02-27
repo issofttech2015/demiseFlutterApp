@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 import 'package:path/path.dart' as p;
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 
 List lessons = [];
 
@@ -47,14 +47,17 @@ class _HomePageState extends State<HomePage> {
           ),
           // child: Icon(Icons.autorenew, color: Colors.white),
           child: new CircleAvatar(
-            child: CachedNetworkImage(
-              imageUrl: 'http://' + serviceUrl + '/FTPAPI/img/' + _lesson.title,
-              placeholder: (context, url) =>
-                  Image.asset('assets/logo/flutter-icon.png'),
-              errorWidget: (context, url, error) => new Icon(Icons.error),
-              useOldImageOnUrlChange: true,
-            ),
-            backgroundColor: Colors.transparent,
+            radius: 40.0,
+            backgroundImage: NetworkImage(
+                'http://' + serviceUrl + '/FTPAPI/img/' + _lesson.title),
+            // CachedNetworkImage(
+            //   imageUrl: 'http://' + serviceUrl + '/FTPAPI/img/' + _lesson.title,
+            //   placeholder: (context, url) =>
+            //       Image.asset('assets/logo/flutter-icon.png'),
+            //   errorWidget: (context, url, error) => new Icon(Icons.error),
+            //   useOldImageOnUrlChange: true,
+            // ),
+            // backgroundColor: Colors.transparent,
           ),
         ),
         title: Text(
