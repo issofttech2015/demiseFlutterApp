@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:demise/utilityhelper/globalutility.dart' as globals;
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 
 class DetailPage extends StatefulWidget {
   final Lesson lesson;
@@ -20,7 +20,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   Directory _downloadsDirectory;
-  String _platformVersion = 'Unknown';
+  // String _platformVersion = 'Unknown';
   Permission permission;
   String serviceUrl = '';
   bool _loadingInProgress = true;
@@ -115,14 +115,19 @@ class _DetailPageState extends State<DetailPage> {
         Container(
           padding:
               EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4),
-          child: CachedNetworkImage(
-            imageUrl:
-                'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title,
-            placeholder: (context, url) =>
-                Image.asset('assets/logo/flutter-icon.png'),
-            errorWidget: (context, url, error) => new Icon(Icons.error),
-            useOldImageOnUrlChange: true,
-          ),
+          child: 
+          Image(
+            image: NetworkImage(
+                'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title),
+          )
+          // CachedNetworkImage(
+          //   imageUrl:
+          //       'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title,
+          //   placeholder: (context, url) =>
+          //       Image.asset('assets/logo/flutter-icon.png'),
+          //   errorWidget: (context, url, error) => new Icon(Icons.error),
+          //   useOldImageOnUrlChange: true,
+          // ),
         ),
         Container(
           height: MediaQuery.of(context).size.height * 0.4,
@@ -335,16 +340,16 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   initPlatformState() async {
-    String platformVersion;
+    // String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await SimplePermissions.platformVersion;
+      // platformVersion = await SimplePermissions.platformVersion;
       var ex = await SimplePermissions.requestPermission(
           Permission.WriteExternalStorage);
       var ex1 = await SimplePermissions.requestPermission(
           Permission.ReadExternalStorage);
     } on PlatformException {
-      platformVersion = 'Failed to get platform version..';
+      // platformVersion = 'Failed to get platform version..';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -353,7 +358,7 @@ class _DetailPageState extends State<DetailPage> {
     if (!mounted) return;
 
     setState(() {
-      _platformVersion = platformVersion;
+      // _platformVersion = platformVersion;
     });
   }
 }
