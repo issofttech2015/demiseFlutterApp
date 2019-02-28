@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import 'package:demise/model/lesson.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:simple_permissions/simple_permissions.dart';
@@ -113,22 +112,23 @@ class _DetailPageState extends State<DetailPage> {
     return Stack(
       children: <Widget>[
         Container(
-          padding:
-              EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4),
-          child: 
-          Image(
-            image: NetworkImage(
-                'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title),
-          )
-          // CachedNetworkImage(
-          //   imageUrl:
-          //       'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title,
-          //   placeholder: (context, url) =>
-          //       Image.asset('assets/logo/flutter-icon.png'),
-          //   errorWidget: (context, url, error) => new Icon(Icons.error),
-          //   useOldImageOnUrlChange: true,
-          // ),
-        ),
+            padding:
+                EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4),
+            child: Image(
+              image: NetworkImage('http://' +
+                  serviceUrl +
+                  '/FTPAPI/img/' +
+                  widget.lesson.title),
+            )
+            // CachedNetworkImage(
+            //   imageUrl:
+            //       'http://' + serviceUrl + '/FTPAPI/img/' + widget.lesson.title,
+            //   placeholder: (context, url) =>
+            //       Image.asset('assets/logo/flutter-icon.png'),
+            //   errorWidget: (context, url, error) => new Icon(Icons.error),
+            //   useOldImageOnUrlChange: true,
+            // ),
+            ),
         Container(
           height: MediaQuery.of(context).size.height * 0.4,
           padding: EdgeInsets.all(40.0),
@@ -270,27 +270,27 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  void downloadFile1() async {
-    // final Directory extDir = await getExternalStorageDirectory();
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${_downloadsDirectory.path}/demise';
-    await new Directory(dirPath).create(recursive: true);
-    final String filePath = '$dirPath/${widget.lesson.title}';
-    final File file = new File(filePath);
-    try {
-      file.writeAsBytes(widget.lesson.serverImage);
-      print(file);
-    } catch (e) {
-      print(e);
-    }
-  }
+  // void downloadFile1() async {
+  //   // final Directory extDir = await getExternalStorageDirectory();
+  //   final Directory extDir = await getApplicationDocumentsDirectory();
+  //   final String dirPath = '${_downloadsDirectory.path}/demise';
+  //   await new Directory(dirPath).create(recursive: true);
+  //   final String filePath = '$dirPath/${widget.lesson.title}';
+  //   final File file = new File(filePath);
+  //   try {
+  //     file.writeAsBytes(widget.lesson.serverImage);
+  //     print(file);
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   Future<void> downloadFile() async {
     Dio dio = Dio();
     print(_downloadsDirectory);
     try {
-      Directory tempDir = await getTemporaryDirectory();
-      Directory dir = await getApplicationDocumentsDirectory();
+      // Directory tempDir = await getTemporaryDirectory();
+      // Directory dir = await getApplicationDocumentsDirectory();
       // var dir = await getExternalStorageDirectory();
       // final String dirPath = '${_downloadsDirectory.path}/demise';
       final String dirPath = _downloadsDirectory.path
@@ -344,10 +344,9 @@ class _DetailPageState extends State<DetailPage> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       // platformVersion = await SimplePermissions.platformVersion;
-      var ex = await SimplePermissions.requestPermission(
+      await SimplePermissions.requestPermission(
           Permission.WriteExternalStorage);
-      var ex1 = await SimplePermissions.requestPermission(
-          Permission.ReadExternalStorage);
+      await SimplePermissions.requestPermission(Permission.ReadExternalStorage);
     } on PlatformException {
       // platformVersion = 'Failed to get platform version..';
     }
