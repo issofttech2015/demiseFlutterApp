@@ -4,7 +4,7 @@ import 'package:demise/model/lesson.dart';
 import 'package:dio/dio.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
+// import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:demise/utilityhelper/globalutility.dart' as globals;
