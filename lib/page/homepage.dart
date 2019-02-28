@@ -1,5 +1,6 @@
 import 'package:demise/model/lesson.dart';
-import 'package:demise/page/detailpage.dart';
+// import 'package:demise/page/detailpage.dart';
+import 'package:demise/page/imagegallery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -12,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 // import 'package:cached_network_image/cached_network_image.dart';
 
-List lessons = [];
+List<Lesson> lessons = [];
 
 class HomePage extends StatefulWidget {
   @override
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ListTile makeListTile(Lesson _lesson) {
+    ListTile makeListTile(Lesson _lesson,index) {
       return ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         leading: Container(
@@ -89,24 +90,36 @@ class _HomePageState extends State<HomePage> {
         trailing:
             Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),
         onTap: () {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => DetailPage(
+          //           lesson: _lesson,
+          //           callback: deletedFile,
+          //         ),
+          //   ),
+          // );
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => DetailPage(
-                        lesson: _lesson,
-                        callback: deletedFile,
-                      )));
+            context,
+            MaterialPageRoute(
+              builder: (context) => ViewImage(
+                    lessons,
+                    deletedFile,
+                    index
+                  ),
+            ),
+          );
         },
       );
     }
 
-    Card makeCard(Lesson lesson) {
+    Card makeCard(Lesson lesson,index) {
       return Card(
         elevation: 8.0,
         margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: Container(
           decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-          child: makeListTile(lesson),
+          child: makeListTile(lesson,index),
         ),
       );
     }
@@ -135,50 +148,50 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: lessons.length,
             itemBuilder: (BuildContext context, int index) {
-              return makeCard(lessons[index]);
+              return makeCard(lessons[index],index);
             },
           ),
         );
       }
     }
 
-    final makeBottom = Container(
-      height: 55.0,
-      child: BottomAppBar(
-        color: Color.fromRGBO(158, 166, 186, 0.4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.home, color: Colors.white),
-              onPressed: () {
-                _loadingInProgress = true;
-                setState(() {});
-                chckDwn();
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.blur_on, color: Colors.white),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.image, color: Colors.white),
-              onPressed: () {
-                _openFileExplorer(FileType.IMAGE);
-                loadContentType();
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.camera, color: Colors.white),
-              onPressed: () {
-                _openFileExplorer(FileType.CAPTURE);
-                loadContentType();
-              },
-            )
-          ],
-        ),
-      ),
-    );
+    // final makeBottom = Container(
+    //   height: 55.0,
+    //   child: BottomAppBar(
+    //     color: Color.fromRGBO(158, 166, 186, 0.4),
+    //     child: Row(
+    //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //       children: <Widget>[
+    //         IconButton(
+    //           icon: Icon(Icons.home, color: Colors.white),
+    //           onPressed: () {
+    //             _loadingInProgress = true;
+    //             setState(() {});
+    //             chckDwn();
+    //           },
+    //         ),
+    //         IconButton(
+    //           icon: Icon(Icons.blur_on, color: Colors.white),
+    //           onPressed: () {},
+    //         ),
+    //         IconButton(
+    //           icon: Icon(Icons.image, color: Colors.white),
+    //           onPressed: () {
+    //             _openFileExplorer(FileType.IMAGE);
+    //             loadContentType();
+    //           },
+    //         ),
+    //         IconButton(
+    //           icon: Icon(Icons.camera, color: Colors.white),
+    //           onPressed: () {
+    //             _openFileExplorer(FileType.CAPTURE);
+    //             loadContentType();
+    //           },
+    //         )
+    //       ],
+    //     ),
+    //   ),
+    // );
     final topAppBar = AppBar(
       elevation: 0.1,
       backgroundColor: Color.fromRGBO(
@@ -195,10 +208,60 @@ class _HomePageState extends State<HomePage> {
     );
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      appBar: topAppBar,
-      body: makeBody(),
-      bottomNavigationBar: makeBottom,
+        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+        appBar: topAppBar,
+        body: makeBody(),
+        floatingActionButton: makeActionButton()
+        // bottomNavigationBar: makeBottom,
+        );
+  }
+
+  Column makeActionButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 0.0, .0, 0.0),
+          child: FloatingActionButton(
+            backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
+            onPressed: () {
+              _loadingInProgress = true;
+              setState(() {});
+              chckDwn();
+            },
+            tooltip: '',
+            child: new Icon(Icons.home),
+            heroTag: null,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 10.0, .0, 0.0),
+          child: FloatingActionButton(
+            backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
+            onPressed: () {
+              _openFileExplorer(FileType.IMAGE);
+              loadContentType();
+            },
+            tooltip: '',
+            child: new Icon(Icons.cloud_upload),
+            heroTag: null,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
+          child: FloatingActionButton(
+            backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
+            onPressed: () {
+              _openFileExplorer(FileType.CAPTURE);
+              loadContentType();
+            },
+            tooltip: '',
+            child: new Icon(Icons.camera_alt),
+            heroTag: null,
+          ),
+        )
+      ],
     );
   }
 
