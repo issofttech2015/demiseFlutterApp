@@ -1,6 +1,7 @@
 import 'package:demise/model/lesson.dart';
 // import 'package:demise/page/detailpage.dart';
 import 'package:demise/page/imagegallery.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -27,6 +28,9 @@ class _HomePageState extends State<HomePage> {
   String _fileName = '...';
   File _file;
   String serviceUrl = '';
+  bool uploading = false;
+  var progressString = "";
+
   @override
   void initState() {
     // lessons = getLessons();
@@ -36,7 +40,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ListTile makeListTile(Lesson _lesson,index) {
+    ListTile makeListTile(Lesson _lesson, index) {
       return ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         leading: Container(
@@ -102,24 +106,20 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ViewImage(
-                    lessons,
-                    deletedFile,
-                    index
-                  ),
+              builder: (context) => ViewImage(lessons, deletedFile, index),
             ),
           );
         },
       );
     }
 
-    Card makeCard(Lesson lesson,index) {
+    Card makeCard(Lesson lesson, index) {
       return Card(
         elevation: 8.0,
         margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
         child: Container(
           decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-          child: makeListTile(lesson,index),
+          child: makeListTile(lesson, index),
         ),
       );
     }
@@ -141,17 +141,45 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       } else {
-        return Container(
-          // decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, 1.0)),
-          child: ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemCount: lessons.length,
-            itemBuilder: (BuildContext context, int index) {
-              return makeCard(lessons[index],index);
-            },
+        return Stack(children: <Widget>[
+          Container(
+            // decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, 1.0)),
+            child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: lessons.length,
+              itemBuilder: (BuildContext context, int index) {
+                return makeCard(lessons[index], index);
+              },
+            ),
           ),
-        );
+          uploading
+              ? Center(
+                  child: Container(
+                    height: 120.0,
+                    width: 200.0,
+                    child: Card(
+                      color: Color.fromRGBO(58, 66, 86, .9),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          CircularProgressIndicator(),
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          Text(
+                            "Uploading File: $progressString",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Text(''),
+        ]);
       }
     }
 
@@ -325,7 +353,8 @@ class _HomePageState extends State<HomePage> {
             .toList()[0]['value'],
         "Data": data
       };
-      uploadFile(args);
+      // uploadFile(args);
+      uploadFileByDio(args);
     }
   }
 
@@ -342,16 +371,49 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void uploadFile(args) {
-    globals.getdata(args, 'FTPAPI/API/UploadFiles').then((response) {
-      afterGetServerData(json.decode(response.body)['data']);
-    }, onError: (ex) {
-      setState(() {});
-      print('Invalid Server. Please verify the address.');
-    }).catchError((ex) {
-      setState(() {});
-      print('Invalid Server. Please verify the address.');
+  // void uploadFile(args) {
+  //   globals.getdata(args, 'FTPAPI/API/UploadFiles').then((response) {
+  //     afterGetServerData(json.decode(response.body)['data']);
+  //   }, onError: (ex) {
+  //     setState(() {});
+  //     print('Invalid Server. Please verify the address.');
+  //   }).catchError((ex) {
+  //     setState(() {});
+  //     print('Invalid Server. Please verify the address.');
+  //   });
+  // }
+
+  void uploadFileByDio(args) async {
+    Dio dio = Dio();
+    try {
+      await dio.post('http://' + serviceUrl + '/FTPAPI/API/UploadFiles',
+          data: jsonEncode(args),
+          options: Options(
+            contentType: ContentType("application", "json", charset: "utf-8"),
+            method: 'POST',
+          ), onSendProgress: (rec, total) {
+        print("SRec: $rec , STotal: $total");
+        setState(() {
+          uploading = true;
+          progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+        });
+      }, onReceiveProgress: (rec, total) {
+        print("Rec: $rec , Total: $total");
+        setState(() {
+          uploading = true;
+          progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+        });
+      }).then((response) {
+        afterGetServerData(response.data['data']);
+      });
+    } catch (e) {
+      print(e);
+    }
+    setState(() {
+      progressString = "Completed";
+      uploading = false;
     });
+    print("Upload completed");
   }
 
   void deletedFile(args) {
