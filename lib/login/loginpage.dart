@@ -205,7 +205,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   onPressed: () {
                     // showToast('Not Implemented');
-                    Navigator.pushReplacementNamed(context, '/homepage');
+                    pingGoogle();
+                    // Navigator.pushReplacementNamed(context, '/homepage');
                   },
                   color: Color.fromRGBO(158, 166, 186, 0.4),
                   label: Text(
@@ -243,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         print('Internet Connected');
         _connectionStatus = true;
-        checkServiceConnectionAndLogin();
+        await checkServiceConnectionAndLogin();
       }
     } on SocketException catch (_) {
       _connectionStatus = false;
@@ -302,7 +303,7 @@ class _LoginPageState extends State<LoginPage> {
     //     globals.Util.setShared('service-url', '192.168.137.101:6161'); // temp
   }
 
-  void checkServiceConnectionAndLogin() async {
+  Future checkServiceConnectionAndLogin() async {
     var serviceUrl = await globals.Util.getShared('service-url');
     dynamic data;
     var args = {
@@ -316,15 +317,18 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         _loadingInProgress = false;
         setState(() {});
+        print('Login Failed.Invalid Server. Please verify the address.');
         showToast('Login Failed.Invalid Server. Please verify the address.');
       }
     }, onError: (ex) {
       _loadingInProgress = false;
       setState(() {});
+      print('Login Failed.Invalid Server. Please verify the address.');
       showToast('Login Failed.Invalid Server. Please verify the address.');
     }).catchError((ex) {
       _loadingInProgress = false;
       setState(() {});
+      print('Login Failed.Invalid Server. Please verify the address.');
       showToast('Login Failed.Invalid Server. Please verify the address.');
     });
   }

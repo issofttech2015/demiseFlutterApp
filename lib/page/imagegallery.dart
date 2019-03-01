@@ -4,7 +4,7 @@ import 'package:demise/model/lesson.dart';
 import 'package:dio/dio.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
+// import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:demise/utilityhelper/globalutility.dart' as globals;
@@ -114,8 +114,10 @@ class _ViewImageState extends State<ViewImage> {
                 serviceUrl +
                 '/FTPAPI/img/' +
                 widget.lessonList[i].title),
+            // maxScale: PhotoViewComputedScale.contained * 0.3,
+            // minScale: PhotoViewComputedScale.contained * 0.9,
+            heroTag: null,
           ),
-      growable: false,
     );
     return listPhotoViewGalleryPageOptions;
   }
@@ -279,8 +281,11 @@ class _ViewImageState extends State<ViewImage> {
               downloadFile();
             },
             tooltip: '',
-            heroTag: null,
-            child: new Icon(Icons.cloud_download),
+            heroTag: Hero(
+              tag: 'cloud_download',
+              child: Icon(Icons.cloud_download),
+            ),
+            child: Icon(Icons.cloud_download),
           ),
         ),
         Padding(
@@ -295,7 +300,10 @@ class _ViewImageState extends State<ViewImage> {
               widget.callback(args);
             },
             tooltip: '',
-            heroTag: null,
+            heroTag: Hero(
+              tag: 'delete_forever',
+              child: Icon(Icons.delete_forever),
+            ),
             child: new Icon(Icons.delete_forever),
           ),
         ),
