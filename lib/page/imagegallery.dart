@@ -105,7 +105,7 @@ class _ViewImageState extends State<ViewImage> {
     // ],
   );
 
-  List<PhotoViewGalleryPageOptions> listOfImage(BuildContext context) {
+  List<PhotoViewGalleryPageOptions> listOfImage() {
     List<PhotoViewGalleryPageOptions> listPhotoViewGalleryPageOptions =
         List.generate(
       widget.lessonList.length,
@@ -194,7 +194,7 @@ class _ViewImageState extends State<ViewImage> {
                 //       widget.lessonList[0].title),
                 // ),
                 PhotoViewGallery(
-              pageOptions: listOfImage(context),
+              pageOptions: listOfImage(),
               onPageChanged: (val) => currentIndex = val,
               pageController: PageController(initialPage: widget.index),
               backgroundDecoration:

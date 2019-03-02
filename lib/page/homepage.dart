@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   String serviceUrl = '';
   bool uploading = false;
   var progressString = "";
+  String imagesView = 'list';
 
   @override
   void initState() {
@@ -144,14 +145,54 @@ class _HomePageState extends State<HomePage> {
         return Stack(children: <Widget>[
           Container(
             // decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, 1.0)),
-            child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: lessons.length,
-              itemBuilder: (BuildContext context, int index) {
-                return makeCard(lessons[index], index);
-              },
-            ),
+            child: imagesView == 'list'
+                ? ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: lessons.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return makeCard(lessons[index], index);
+                    },
+                  )
+                : GridView.builder(
+                    itemCount: lessons.length,
+                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: 5.0,
+                        crossAxisSpacing: 5.0,
+                        childAspectRatio: 0.5,
+                        crossAxisCount: 3),
+                    itemBuilder: (BuildContext context, int index) {
+                      return new GestureDetector(
+                        child: new Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage('http://' +
+                                  serviceUrl +
+                                  '/FTPAPI/img/' +
+                                  lessons[index].title),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          // child: Image(
+                          //   image: NetworkImage('http://' +
+                          //       serviceUrl +
+                          //       '/FTPAPI/img/' +
+                          //       lessons[index].title),
+                          //   fit: BoxFit.cover,
+                          // ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ViewImage(lessons, deletedFile, index),
+                            ),
+                          );
+                        },
+                      );
+                    }),
           ),
           uploading
               ? Center(
@@ -225,14 +266,16 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Color.fromRGBO(
           158, 166, 186, 0.4), // Color.fromRGBO(58, 66, 86, 1.0),
       title: Text('Demise'),
-      // actions: <Widget>[
-      //   IconButton(
-      //     icon: Icon(Icons.power_settings_new),
-      //     onPressed: () {
-      //       Navigator.pushReplacementNamed(context, '/logout');
-      //     },
-      //   )
-      // ],
+      actions: <Widget>[
+        IconButton(
+          icon: imagesView == 'list'
+              ? Icon(Icons.grid_on)
+              : Icon(Icons.view_list),
+          onPressed: () {
+            toggleImgaeView();
+          },
+        )
+      ],
     );
 
     return Scaffold(
@@ -242,6 +285,16 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: makeActionButton()
         // bottomNavigationBar: makeBottom,
         );
+  }
+
+  void toggleImgaeView() {
+    if (imagesView == 'list') {
+      imagesView = 'grid';
+    } else {
+      imagesView = 'list';
+    }
+    globals.Util.setShared('image-view', imagesView);
+    setState(() {});
   }
 
   Column makeActionButton() {
@@ -295,6 +348,7 @@ class _HomePageState extends State<HomePage> {
 
   void chckDwn() async {
     serviceUrl = await globals.Util.getShared('service-url');
+    imagesView = await globals.Util.getShared('image-view');
     var args = {};
     globals.getdata(args, 'FTPAPI/API/GetFiles').then((response) {
       afterGetServerData(json.decode(response.body)['data']);

@@ -301,6 +301,7 @@ class _LoginPageState extends State<LoginPage> {
     serviceUrl ?? globals.Util.setShared('service-url', '192.168.0.69'); // per
     // serviceUrl ??
     //     globals.Util.setShared('service-url', '192.168.137.101:6161'); // temp
+    setView();
   }
 
   Future checkServiceConnectionAndLogin() async {
@@ -331,6 +332,11 @@ class _LoginPageState extends State<LoginPage> {
       print('Login Failed.Invalid Server. Please verify the address.');
       showToast('Login Failed.Invalid Server. Please verify the address.');
     });
+  }
+
+  void setView() async {
+    var imagesView = await globals.Util.getShared('image-view');
+    imagesView ?? globals.Util.setShared('image-view', 'list');
   }
 
   // void chckDwn() {
