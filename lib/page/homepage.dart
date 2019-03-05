@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                     gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
                         mainAxisSpacing: 5.0,
                         crossAxisSpacing: 5.0,
-                        childAspectRatio: 0.5,
+                        childAspectRatio: 1.0,
                         crossAxisCount: 3),
                     itemBuilder: (BuildContext context, int index) {
                       return new GestureDetector(
@@ -175,6 +175,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           // child: Image(
+                          //   height: 150.0,
                           //   image: NetworkImage('http://' +
                           //       serviceUrl +
                           //       '/FTPAPI/img/' +
