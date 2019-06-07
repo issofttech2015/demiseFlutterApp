@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:demise/model/lesson.dart';
+import 'package:demise/utilityhelper/globalutility.dart';
 import 'package:dio/dio.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class _ViewImageState extends State<ViewImage> {
   Directory _downloadsDirectory;
   Permission permission;
   String serviceUrl = '';
+  String serviceMode = '';
+  String serviceMethod = '/';
   bool _loadingInProgress = true;
   bool downloading = false;
   var progressString = "";
@@ -94,7 +97,20 @@ class _ViewImageState extends State<ViewImage> {
     elevation: 0.1,
     backgroundColor:
         Color.fromRGBO(158, 166, 186, 0.4), // Color.fromRGBO(58, 66, 86, 1.0),
-    title: Text('Demise'),
+    title: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(aboutList[0]['value']),
+        Text(
+          'v' + aboutList[1]['value'],
+          style: TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+      ],
+    ),
     // actions: <Widget>[
     //   IconButton(
     //     icon: Icon(Icons.power_settings_new),
@@ -112,7 +128,7 @@ class _ViewImageState extends State<ViewImage> {
       (int i) => new PhotoViewGalleryPageOptions(
             imageProvider: NetworkImage('http://' +
                 serviceUrl +
-                '/FTPAPI/img/' +
+                serviceMethod +
                 widget.lessonList[i].title),
             // maxScale: PhotoViewComputedScale.contained * 0.3,
             // minScale: PhotoViewComputedScale.contained * 0.9,
@@ -124,7 +140,8 @@ class _ViewImageState extends State<ViewImage> {
 
   Future<void> initDownloadsDirectoryState() async {
     serviceUrl = await globals.Util.getShared('service-url');
-
+    serviceMode = await globals.Util.getShared('service-mode');
+    getMethod();
     Directory downloadsDirectory;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
@@ -293,11 +310,13 @@ class _ViewImageState extends State<ViewImage> {
           child: FloatingActionButton(
             backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
             onPressed: () {
-              var args = {
-                "TblFileID": widget.lessonList[currentIndex].price,
-                "Name": widget.lessonList[currentIndex].title,
-              };
-              widget.callback(args);
+              if (serviceMode == 'LOCAL_SERVER') {
+                var args = {
+                  "TblFileID": widget.lessonList[currentIndex].price,
+                  "Name": widget.lessonList[currentIndex].title,
+                };
+                widget.callback(args);
+              }
             },
             tooltip: '',
             heroTag: Hero(
@@ -309,5 +328,9 @@ class _ViewImageState extends State<ViewImage> {
         ),
       ],
     );
+  }
+
+  void getMethod() {
+    serviceMethod = serviceMode == "SERVER" ? '/' : '/FTPAPI/img/';
   }
 }

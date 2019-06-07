@@ -3,9 +3,10 @@ import 'dart:io';
 
 import 'dart:convert';
 
+import 'package:demise/utilityhelper/globalutility.dart';
 import 'package:flutter/material.dart';
-import 'package:connectivity/connectivity.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:connectivity/connectivity.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:demise/utilityhelper/globalutility.dart' as globals;
 // import 'package:device_info/device_info.dart';
@@ -19,10 +20,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // final _userName = new TextEditingController();
-  StreamSubscription<ConnectivityResult> subscription;
-  Connectivity connectivity;
+  // StreamSubscription<ConnectivityResult> subscription;
+  // Connectivity connectivity;
   bool _connectionStatus = false;
   bool _loadingInProgress = false;
+  BuildContext _customContext;
 // bool isAdmin = false;
 
   // List<int> arr = [];
@@ -31,35 +33,36 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     // TODO: implement initState
     checkServer();
-    connectivity = new Connectivity();
-    subscription =
-        connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
-      if ((result == ConnectivityResult.wifi ||
-              result == ConnectivityResult.mobile) &&
-          !_connectionStatus) {
-        _connectionStatus = true;
-        pingGoogle();
-        // deviceInfo();
-        // showToast(result.toString());
-      } else {
-        print(result);
-        _connectionStatus = false;
-        showToast(result.toString());
-      }
-      setState(() {});
-    });
+    // connectivity = new Connectivity();
+    // subscription =
+    //     connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+    //   if ((result == ConnectivityResult.wifi ||
+    //           result == ConnectivityResult.mobile) &&
+    //       !_connectionStatus) {
+    //     _connectionStatus = true;
+    //     pingGoogle();
+    //     // deviceInfo();
+    //     // showToast(result.toString());
+    //   } else {
+    //     print(result);
+    //     _connectionStatus = false;
+    //     showToast(result.toString());
+    //   }
+    //   setState(() {});
+    // });
     super.initState();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    subscription.cancel();
+    // subscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    _customContext = context;
     return new Scaffold(
       body: _buildBody(),
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
@@ -188,7 +191,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   onPressed: () {
                     // chckDwn();
-                    showToast('Not Implemented');
+                    alertdialog(context, 'Not Implemented');
+                    // showToast('Not Implemented');
                   },
                   color: Color.fromRGBO(158, 166, 186, 0.4),
                   label: Text(
@@ -244,42 +248,51 @@ class _LoginPageState extends State<LoginPage> {
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         print('Internet Connected');
         _connectionStatus = true;
-        await checkServiceConnectionAndLogin();
+        var serviceMode = await globals.Util.getShared('service-mode');
+        if (serviceMode == 'SERVER') {
+          Navigator.pushReplacementNamed(context, '/homepage');
+        } else {
+          await checkServiceConnectionAndLogin();
+        }
       }
     } on SocketException catch (_) {
       _connectionStatus = false;
-      showToast('Internet Not Available');
+      alertdialog(context, 'Internet Not Available');
+      // showToast('Internet Not Available');
       setState(() {});
     }
   }
 
   void callDialog(BuildContext context) async {
     openDialog(
-      context,
-      // dataSubList['@methodID'],
-      await globals.Util.getShared('service-url', false),
-      // await globals.Util.getShared('station-list', false),
-    );
+        context,
+        // dataSubList['@methodID'],
+        await globals.Util.getShared('service-url'),
+        customLogout);
   }
 
-  void openDialog(BuildContext context, String serviceName) {
-    showDialog(
-        context: context,
-        // barrierDismissible: true,
-        builder: (BuildContext context) {
-          return new Theme(
-            data: Theme.of(context).copyWith(
-                dialogBackgroundColor: Color.fromRGBO(158, 166, 186, 0.4)),
-            child: SimpleDialog(
-              title: new Text(
-                "API Config",
-                style: TextStyle(color: Colors.white),
-              ),
-              children: <Widget>[ApiConfing(serviceName)],
-            ),
-          );
-        });
+  void customLogout() {
+    Navigator.pushReplacementNamed(_customContext, '/logout');
   }
+
+  // void openDialog(BuildContext context, String serviceName) {
+  //   showDialog(
+  //       context: context,
+  //       // barrierDismissible: true,
+  //       builder: (BuildContext context) {
+  //         return new Theme(
+  //           data: Theme.of(context).copyWith(
+  //               dialogBackgroundColor: Color.fromRGBO(158, 166, 186, 0.4)),
+  //           child: SimpleDialog(
+  //             title: new Text(
+  //               "API Config",
+  //               style: TextStyle(color: Colors.white),
+  //             ),
+  //             children: <Widget>[ApiConfing(serviceName)],
+  //           ),
+  //         );
+  //       });
+  // }
 
   // void deviceInfo() async {
   //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -298,9 +311,12 @@ class _LoginPageState extends State<LoginPage> {
   void checkServer() async {
     var serviceUrl = await globals.Util.getShared('service-url');
 
-    serviceUrl ?? globals.Util.setShared('service-url', '192.168.0.69'); // per
+    serviceUrl ?? globals.Util.setShared('service-url', 'i.pravatar.cc'); // per
+    serviceUrl ?? globals.Util.setShared('service-mode', 'SERVER'); // per
+
     // serviceUrl ??
     //     globals.Util.setShared('service-url', '192.168.137.101:6161'); // temp
+    pingGoogle();
     setView();
   }
 
@@ -319,18 +335,24 @@ class _LoginPageState extends State<LoginPage> {
         _loadingInProgress = false;
         setState(() {});
         print('Login Failed.Invalid Server. Please verify the address.');
-        showToast('Login Failed.Invalid Server. Please verify the address.');
+        alertdialog(
+            context, 'Login Failed.Invalid Server. Please verify the address.');
+        // showToast('Login Failed.Invalid Server. Please verify the address.');
       }
     }, onError: (ex) {
       _loadingInProgress = false;
       setState(() {});
       print('Login Failed.Invalid Server. Please verify the address.');
-      showToast('Login Failed.Invalid Server. Please verify the address.');
+      alertdialog(
+          context, 'Login Failed.Invalid Server. Please verify the address.');
+      // showToast('Login Failed.Invalid Server. Please verify the address.');
     }).catchError((ex) {
       _loadingInProgress = false;
       setState(() {});
       print('Login Failed.Invalid Server. Please verify the address.');
-      showToast('Login Failed.Invalid Server. Please verify the address.');
+      alertdialog(
+          context, 'Login Failed.Invalid Server. Please verify the address.');
+      // showToast('Login Failed.Invalid Server. Please verify the address.');
     });
   }
 
@@ -375,184 +397,187 @@ class _LoginPageState extends State<LoginPage> {
   // }
 }
 
-class ApiConfing extends StatefulWidget {
-  final String _serviceName;
-  ApiConfing(this._serviceName);
-  @override
-  _ApiConfingState createState() => _ApiConfingState();
-}
+// class ApiConfing extends StatefulWidget {
+//   final String _serviceName;
+//   ApiConfing(this._serviceName);
+//   @override
+//   _ApiConfingState createState() => _ApiConfingState();
+// }
 
-class _ApiConfingState extends State<ApiConfing> {
-  final _serviceName = new TextEditingController();
-  final _password = new TextEditingController();
-  bool isNotShowPass = true;
-  bool _loadingInProgress = false;
+// class _ApiConfingState extends State<ApiConfing> {
+//   final _serviceName = new TextEditingController();
+//   final _password = new TextEditingController();
+//   bool isNotShowPass = true;
+//   bool _loadingInProgress = false;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    _serviceName.text = widget._serviceName;
-    super.initState();
-  }
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     _serviceName.text = widget._serviceName;
+//     super.initState();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_loadingInProgress) {
-      return new Column(
-        children: [
-          new Center(
-            child: new CircularProgressIndicator(
-              backgroundColor: Colors.white,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        children: <Widget>[
-          new Padding(
-            padding: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
-            child: new Row(
-              children: [
-                new Expanded(
-                  child: new TextField(
-                    onEditingComplete: () {
-                      _loadingInProgress = true;
-                      setState(() {});
-                      checkServiceConnection();
-                    },
-                    controller: _serviceName,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500),
-                    autofocus: false,
-                    decoration: InputDecoration(
-                        counterStyle: TextStyle(color: Colors.white),
-                        border: InputBorder.none,
-                        hintText: 'Service Address'),
-                  ),
-                ),
-                // new Container(
-                //   margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                //   child: new IconButton(
-                //       color: Colors.blueAccent,
-                //       icon: Icon(
-                //         Icons.network_check,
-                //         color: Colors.white,
-                //       ),
-                //       tooltip: 'Check Service Connection',
-                //       onPressed: () {
-                //         _loadingInProgress = true;
-                //         setState(() {});
-                //         checkServiceConnection();
-                //       }),
-                // ),
-              ],
-            ),
-          ),
-          new Padding(
-            padding: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
-            child: new Row(
-              children: [
-                new Expanded(
-                  child: new TextField(
-                    controller: _password,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500),
-                    autofocus: true,
-                    obscureText: isNotShowPass,
-                    decoration: InputDecoration(
-                        counterStyle: TextStyle(color: Colors.white),
-                        border: InputBorder.none,
-                        hintText: 'Password'),
-                  ),
-                ),
-                new Container(
-                  margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                  child: new IconButton(
-                      color: Colors.blueAccent,
-                      icon: Icon(
-                        isNotShowPass ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.white,
-                      ),
-                      tooltip: 'Show Password',
-                      onPressed: () {
-                        isNotShowPass = !isNotShowPass;
-                        setState(() {});
-                      }),
-                ),
-              ],
-            ),
-          ),
-          new Container(
-            margin: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
-            child: new MaterialButton(
-                height: 40.0,
-                color: Color.fromRGBO(58, 66, 86, 1.0),
-                textColor: Colors.white,
-                child: new Text("Submit"),
-                onPressed: () {
-                  if (_password.text == 'Neel10') {
-                    _loadingInProgress = true;
-                    setState(() {});
-                    checkServiceConnection();
-                  } else {
-                    updateServiceUrl('You are not Admin');
-                  }
-                }),
-          )
-        ],
-      );
-    }
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     if (_loadingInProgress) {
+//       return new Column(
+//         children: [
+//           new Center(
+//             child: new CircularProgressIndicator(
+//               backgroundColor: Colors.white,
+//             ),
+//           ),
+//         ],
+//       );
+//     } else {
+//       return Column(
+//         children: <Widget>[
+//           new Padding(
+//             padding: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
+//             child: new Row(
+//               children: [
+//                 new Expanded(
+//                   child: new TextField(
+//                     onEditingComplete: () {
+//                       _loadingInProgress = true;
+//                       setState(() {});
+//                       checkServiceConnection();
+//                     },
+//                     controller: _serviceName,
+//                     style: TextStyle(
+//                         color: Colors.white,
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.w500),
+//                     autofocus: false,
+//                     decoration: InputDecoration(
+//                         counterStyle: TextStyle(color: Colors.white),
+//                         border: InputBorder.none,
+//                         hintText: 'Service Address'),
+//                   ),
+//                 ),
+//                 // new Container(
+//                 //   margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+//                 //   child: new IconButton(
+//                 //       color: Colors.blueAccent,
+//                 //       icon: Icon(
+//                 //         Icons.network_check,
+//                 //         color: Colors.white,
+//                 //       ),
+//                 //       tooltip: 'Check Service Connection',
+//                 //       onPressed: () {
+//                 //         _loadingInProgress = true;
+//                 //         setState(() {});
+//                 //         checkServiceConnection();
+//                 //       }),
+//                 // ),
+//               ],
+//             ),
+//           ),
+//           new Padding(
+//             padding: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
+//             child: new Row(
+//               children: [
+//                 new Expanded(
+//                   child: new TextField(
+//                     controller: _password,
+//                     style: TextStyle(
+//                         color: Colors.white,
+//                         fontSize: 16.0,
+//                         fontWeight: FontWeight.w500),
+//                     autofocus: true,
+//                     obscureText: isNotShowPass,
+//                     decoration: InputDecoration(
+//                         counterStyle: TextStyle(color: Colors.white),
+//                         border: InputBorder.none,
+//                         hintText: 'Password'),
+//                   ),
+//                 ),
+//                 new Container(
+//                   margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+//                   child: new IconButton(
+//                       color: Colors.blueAccent,
+//                       icon: Icon(
+//                         isNotShowPass ? Icons.visibility : Icons.visibility_off,
+//                         color: Colors.white,
+//                       ),
+//                       tooltip: 'Show Password',
+//                       onPressed: () {
+//                         isNotShowPass = !isNotShowPass;
+//                         setState(() {});
+//                       }),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           new Container(
+//             margin: EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
+//             child: new MaterialButton(
+//                 height: 40.0,
+//                 color: Color.fromRGBO(58, 66, 86, 1.0),
+//                 textColor: Colors.white,
+//                 child: new Text("Submit"),
+//                 onPressed: () {
+//                   if (_password.text == 'Neel10') {
+//                     _loadingInProgress = true;
+//                     setState(() {});
+//                     checkServiceConnection();
+//                   } else {
+//                     updateServiceUrl('You are not Admin');
+//                   }
+//                 }),
+//           )
+//         ],
+//       );
+//     }
+//   }
 
-  void checkServiceConnection() async {
-    dynamic data;
-    var args = {
-      "ip": _serviceName.text,
-    };
+//   void checkServiceConnection() async {
+//     dynamic data;
+//     var args = {
+//       "ip": _serviceName.text,
+//     };
 
-    globals.getdata(args, 'FTPAPI/API/CheckServer', _serviceName.text).then(
-        (response) {
-      var extractdata = json.decode(response.body)["data"];
-      print(extractdata);
-      data = extractdata;
-      if (data.length > 0) {
-        globals.Util.setShared('service-url', _serviceName.text, false);
-        updateServiceUrl('Update API Config...');
-      } else {
-        _loadingInProgress = false;
-        setState(() {});
-        showToast('Error');
-        // revertServiceConnection();
-      }
-    }, onError: (ex) {
-      _loadingInProgress = false;
-      setState(() {});
-      showToast('Invalid Server. Please verify the address.');
-    }).catchError((ex) {
-      _loadingInProgress = false;
-      setState(() {});
-      showToast('Invalid Server. Please verify the address.');
-    });
-  }
+//     globals.getdata(args, 'FTPAPI/API/CheckServer', _serviceName.text).then(
+//         (response) {
+//       var extractdata = json.decode(response.body)["data"];
+//       print(extractdata);
+//       data = extractdata;
+//       if (data.length > 0) {
+//         globals.Util.setShared('service-url', _serviceName.text, false);
+//         updateServiceUrl('Update API Config...');
+//       } else {
+//         _loadingInProgress = false;
+//         setState(() {});
+//         alertdialog(context, 'Error.');
+//         // showToast('Error');
+//         // revertServiceConnection();
+//       }
+//     }, onError: (ex) {
+//       _loadingInProgress = false;
+//       setState(() {});
+//       alertdialog(context, 'Invalid Server. Please verify the address.');
+//       // showToast('Invalid Server. Please verify the address.');
+//     }).catchError((ex) {
+//       _loadingInProgress = false;
+//       setState(() {});
+//       alertdialog(context, 'Invalid Server. Please verify the address.');
+//       // showToast('Invalid Server. Please verify the address.');
+//     });
+//   }
 
-  void updateServiceUrl(msg) {
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-      showToast(msg);
-    }
-  }
-}
+//   void updateServiceUrl(msg) {
+//     if (Navigator.canPop(context)) {
+//       alertdialog(context, msg);
+//       Navigator.pop(context);
+//     }
+//   }
+// }
 
-showToast(String _msg) {
-  Fluttertoast.showToast(
-      msg: _msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIos: 3,
-      textColor: Colors.white);
-}
+// showToast(String _msg) {
+//   Fluttertoast.showToast(
+//       msg: _msg,
+//       toastLength: Toast.LENGTH_SHORT,
+//       gravity: ToastGravity.BOTTOM,
+//       timeInSecForIos: 3,
+//       textColor: Colors.white);
+// }
