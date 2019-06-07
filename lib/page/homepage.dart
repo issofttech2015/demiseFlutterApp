@@ -1,6 +1,7 @@
 import 'package:demise/model/lesson.dart';
 // import 'package:demise/page/detailpage.dart';
 import 'package:demise/page/imagegallery.dart';
+import 'package:demise/utilityhelper/globalutility.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -28,10 +29,12 @@ class _HomePageState extends State<HomePage> {
   String _fileName = '...';
   File _file;
   String serviceUrl = '';
+  String serviceMode = '';
+  String serviceMethod = '/';
   bool uploading = false;
   var progressString = "";
   String imagesView = 'list';
-
+  BuildContext _customContext;
   @override
   void initState() {
     // lessons = getLessons();
@@ -41,6 +44,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    _customContext = context;
     ListTile makeListTile(Lesson _lesson, index) {
       return ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -55,7 +59,7 @@ class _HomePageState extends State<HomePage> {
           child: new CircleAvatar(
             radius: 40.0,
             backgroundImage: NetworkImage(
-                'http://' + serviceUrl + '/FTPAPI/img/' + _lesson.title),
+                'http://' + serviceUrl + serviceMethod + _lesson.title),
             // CachedNetworkImage(
             //   imageUrl: 'http://' + serviceUrl + '/FTPAPI/img/' + _lesson.title,
             //   placeholder: (context, url) =>
@@ -92,8 +96,7 @@ class _HomePageState extends State<HomePage> {
             )
           ],
         ),
-        trailing:
-            Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),
+        trailing: Icon(Icons.favorite_border, color: Colors.white, size: 30.0),
         onTap: () {
           // Navigator.push(
           //   context,
@@ -163,17 +166,53 @@ class _HomePageState extends State<HomePage> {
                         crossAxisCount: 3),
                     itemBuilder: (BuildContext context, int index) {
                       return new GestureDetector(
-                        child: new Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage('http://' +
-                                  serviceUrl +
-                                  '/FTPAPI/img/' +
-                                  lessons[index].title),
-                              fit: BoxFit.cover,
+                        child: GridTile(
+                          child: new Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage('http://' +
+                                    serviceUrl +
+                                    serviceMethod +
+                                    lessons[index].title),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
+                          footer: SizedBox(
+                            height: 40.0,
+                            child: GridTileBar(
+                              backgroundColor: Colors.black54,
+                              title: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.bottomLeft,
+                                child: Text(lessons[index].title),
+                              ),
+                              subtitle: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.bottomLeft,
+                                child: Text(
+                                  lessons[index].level,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                              trailing: Icon(
+                                Icons.favorite_border,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          // child: new Container(
+                          //   alignment: Alignment.center,
+                          //   decoration: BoxDecoration(
+                          //     image: DecorationImage(
+                          //       image: NetworkImage('http://' +
+                          //           serviceUrl +
+                          //           serviceMethod +
+                          //           lessons[index].title),
+                          //       fit: BoxFit.cover,
+                          //     ),
+                          //   ),
                           // child: Image(
                           //   height: 150.0,
                           //   image: NetworkImage('http://' +
@@ -266,8 +305,29 @@ class _HomePageState extends State<HomePage> {
       elevation: 0.1,
       backgroundColor: Color.fromRGBO(
           158, 166, 186, 0.4), // Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text('Demise'),
+      title: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(aboutList[0]['value']),
+          Text(
+            'v' + aboutList[1]['value'],
+            style: TextStyle(
+              fontSize: 12.0,
+            ),
+          ),
+        ],
+      ),
       actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            // _activeMeterIndex = 5; // becused menu item is fixed.
+            // _scaffoldKey.currentState.openDrawer();
+            callDialog(context);
+          },
+        ),
         IconButton(
           icon: imagesView == 'list'
               ? Icon(Icons.grid_on)
@@ -308,6 +368,18 @@ class _HomePageState extends State<HomePage> {
           child: FloatingActionButton(
             backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
             onPressed: () {
+              aboutDialog(context);
+            },
+            tooltip: 'Aobut',
+            child: new Icon(Icons.description),
+            heroTag: null,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 10.0, .0, 0.0),
+          child: FloatingActionButton(
+            backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
+            onPressed: () {
               _loadingInProgress = true;
               setState(() {});
               chckDwn();
@@ -322,8 +394,10 @@ class _HomePageState extends State<HomePage> {
           child: FloatingActionButton(
             backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
             onPressed: () {
-              _openFileExplorer(FileType.IMAGE);
-              loadContentType();
+              if (serviceMode != 'SERVER') {
+                _openFileExplorer(FileType.IMAGE);
+                loadContentType();
+              }
             },
             tooltip: '',
             child: new Icon(Icons.cloud_upload),
@@ -335,8 +409,10 @@ class _HomePageState extends State<HomePage> {
           child: FloatingActionButton(
             backgroundColor: Color.fromRGBO(158, 166, 186, 0.5),
             onPressed: () {
-              _openFileExplorer(FileType.CAPTURE);
-              loadContentType();
+              if (serviceMode != 'SERVER') {
+                _openFileExplorer(FileType.CAPTURE);
+                loadContentType();
+              }
             },
             tooltip: '',
             child: new Icon(Icons.camera_alt),
@@ -348,18 +424,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   void chckDwn() async {
+    serviceMode = await globals.Util.getShared('service-mode');
     serviceUrl = await globals.Util.getShared('service-url');
     imagesView = await globals.Util.getShared('image-view');
-    var args = {};
-    globals.getdata(args, 'FTPAPI/API/GetFiles').then((response) {
-      afterGetServerData(json.decode(response.body)['data']);
-    }, onError: (ex) {
+    getMethod();
+    if (serviceMode == 'SERVER') {
+      var count = 0;
+      lessons = [];
+      while (count++ < 21) {
+        lessons.add(Lesson(
+            title: (600 + count).toString(),
+            level: 'jpge',
+            indicatorValue: 0.33,
+            price: count,
+            serverImage: [],
+            content:
+                "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."));
+      }
+      _loadingInProgress = false;
       setState(() {});
-      print('Invalid Server. Please verify the address.');
-    }).catchError((ex) {
-      setState(() {});
-      print('Invalid Server. Please verify the address..');
-    });
+    } else {
+      var args = {};
+      globals.getdata(args, 'FTPAPI/API/GetFiles').then((response) {
+        afterGetServerData(json.decode(response.body)['data']);
+      }, onError: (ex) {
+        setState(() {});
+        print('Invalid Server. Please verify the address.');
+      }).catchError((ex) {
+        setState(() {});
+        print('Invalid Server. Please verify the address..');
+      });
+    }
   }
 
   afterGetServerData(List extractdata) {
@@ -487,6 +582,23 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
       print('Invalid Server. Please verify the address.');
     });
+  }
+
+  void getMethod() {
+    serviceMethod = serviceMode == "SERVER" ? '/' : '/FTPAPI/img/';
+  }
+
+  void callDialog(BuildContext context) async {
+    openDialog(
+        context,
+        // dataSubList['@methodID'],
+        await globals.Util.getShared('service-url'),
+        customLogout);
+  }
+
+  void customLogout() {
+    Navigator.pushNamedAndRemoveUntil(
+        context, '/logout', ModalRoute.withName('/logout'));
   }
 }
 
